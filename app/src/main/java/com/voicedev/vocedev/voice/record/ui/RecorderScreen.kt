@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,10 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.icons.Icons
-import androidx.compose.material3.icons.filled.Lock
-import androidx.compose.material3.icons.filled.LockOpen
-import androidx.compose.material3.icons.filled.Mic
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.semantics.Role
@@ -106,7 +108,7 @@ fun RecorderScreen(
                 }
             ) {
                 Icon(
-                    imageVector = if (model.isLocked) Icons.Default.Lock else Icons.Default.LockOpen,
+                    imageVector = if (model.isLocked) Icons.Default.Lock else Icons.Default.Delete,
                     contentDescription = if (model.isLocked) "Unlock recording" else "Lock recording"
                 )
             }
@@ -244,7 +246,7 @@ private fun RecordButton(
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            imageVector = Icons.Default.Mic,
+            imageVector = Icons.Default.PlayArrow,
             contentDescription = null,
             tint = Color.White
         )

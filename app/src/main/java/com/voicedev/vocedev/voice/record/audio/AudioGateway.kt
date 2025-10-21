@@ -1,5 +1,6 @@
 package com.voicedev.vocedev.voice.record.audio
 
+import android.Manifest
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioRecord
@@ -91,7 +92,8 @@ class AudioGateway(
     private val ioDispatcher: CoroutineDispatcher
 ) {
 
-    suspend fun startRecording(
+    @RequiresPermission(Manifest.permission.RECORD_AUDIO)
+	suspend fun startRecording(
         scope: CoroutineScope,
         gain: Float,
         noiseSuppression: Boolean,
@@ -267,7 +269,7 @@ class AudioGateway(
         }
     }
 
-    private class GainHolder(initial: Float) {
+    class GainHolder(initial: Float) {
         @Volatile
         var value: Float = initial
     }
@@ -280,7 +282,8 @@ class AndroidAudioSource(
     private val ioDispatcher: CoroutineDispatcher
 ) : IAudioSource {
 
-    override suspend fun start(
+    @RequiresPermission(Manifest.permission.RECORD_AUDIO)
+	override suspend fun start(
         scope: CoroutineScope,
         config: AudioSourceConfig,
         onData: suspend (ShortArray, Int) -> Unit,
@@ -306,7 +309,8 @@ class AndroidAudioSource(
         return session
     }
 
-    private fun createAudioRecord(config: AudioSourceConfig, bufferSize: Int): AudioRecord {
+    @RequiresPermission(Manifest.permission.RECORD_AUDIO)
+	private fun createAudioRecord(config: AudioSourceConfig, bufferSize: Int): AudioRecord {
         val channelConfig = if (config.channelCount == 1) {
             AudioFormat.CHANNEL_IN_MONO
         } else {
@@ -321,12 +325,12 @@ class AndroidAudioSource(
             .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
             .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
             .build()
+
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             AudioRecord.Builder()
                 .setAudioSource(MediaRecorder.AudioSource.VOICE_RECOGNITION)
                 .setBufferSizeInBytes(bufferSize)
                 .setAudioFormat(format)
-                .setAudioAttributes(attributes)
                 .build()
         } else {
             @Suppress("DEPRECATION")
