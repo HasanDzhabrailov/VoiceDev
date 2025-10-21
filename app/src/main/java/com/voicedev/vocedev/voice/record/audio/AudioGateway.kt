@@ -478,17 +478,10 @@ class OpusEncoder(
     override suspend fun start(sampleRate: Int, channelCount: Int) {
         withContext(ioDispatcher) {
             val codecInfo = findOpusCodec()
-            if (codecInfo != null) {
-                codec = MediaCodec.createByCodecName(codecInfo.name).apply {
-                    val format = android.media.MediaFormat.createAudioFormat(
-                        "audio/opus",
-                        sampleRate,
-                        channelCount
-                    )
-                    configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
-                    start()
-                }
-            } else {
+            codec = codecInfo?.let { info ->
+                tryCreateCodec(info, sampleRate, channelCount)
+            }
+            if (codec == null) {
                 setupFallback(sampleRate, channelCount)
             }
             started = true
@@ -592,11 +585,36 @@ class OpusEncoder(
     }
 
     private fun findOpusCodec(): MediaCodecInfo? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            MediaCodecList(MediaCodecList.ALL_CODECS).codecInfos.firstOrNull { info ->
-                !info.isEncoder && info.supportedTypes.any { it.equals("audio/opus", ignoreCase = true) }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            return null
+        }
+        return MediaCodecList(MediaCodecList.ALL_CODECS).codecInfos.firstOrNull { info ->
+            info.isEncoder && info.supportedTypes.any { it.equals("audio/opus", ignoreCase = true) }
+        }
+    }
+
+    private fun tryCreateCodec(
+        codecInfo: MediaCodecInfo,
+        sampleRate: Int,
+        channelCount: Int
+    ): MediaCodec? {
+        var candidate: MediaCodec? = null
+        return try {
+            candidate = MediaCodec.createByCodecName(codecInfo.name)
+            candidate.apply {
+                val format = android.media.MediaFormat.createAudioFormat(
+                    "audio/opus",
+                    sampleRate,
+                    channelCount
+                )
+                configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+                start()
             }
-        } else {
+        } catch (_: Throwable) {
+            candidate?.run {
+                runCatching { stop() }
+                runCatching { release() }
+            }
             null
         }
     }
