@@ -1,7 +1,9 @@
 plugins {
-	alias(libs.plugins.android.application)
-	alias(libs.plugins.kotlin.android)
-	alias(libs.plugins.kotlin.compose)
+        alias(libs.plugins.android.application)
+        alias(libs.plugins.kotlin.android)
+        alias(libs.plugins.kotlin.compose)
+        alias(libs.plugins.kotlin.kapt)
+        alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -48,9 +50,15 @@ dependencies {
         implementation(libs.androidx.compose.material3)
         implementation(libs.kotlinx.coroutines.android)
         implementation(libs.kotlinx.coroutines.core)
+        implementation(libs.kotlinx.serialization.json)
         implementation(libs.arkivanov.decompose)
         implementation(libs.arkivanov.essenty.lifecycle)
         implementation(libs.androidx.lifecycle.runtime.compose)
+        implementation(libs.androidx.room.runtime)
+        implementation(libs.androidx.room.ktx)
+        kapt(libs.androidx.room.compiler)
+        implementation(libs.androidx.media3.exoplayer)
+        implementation(libs.androidx.media3.ui)
 
         testImplementation(libs.junit)
         testImplementation(libs.kotlinx.coroutines.test)
